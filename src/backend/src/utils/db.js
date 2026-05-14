@@ -7,3 +7,4 @@ export const client = new Sequelize({
   database: process.env.DB_DATABASE,
   dialect: 'postgres',
 });
+
