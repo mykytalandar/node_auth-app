@@ -2,8 +2,9 @@ import { useContext, useState } from 'react';
 import type { LoginFormErrors } from '../types/FormErrors';
 import { validateValues } from '../utils/validateValues.ts';
 import { login } from '../api/auth.ts';
-import { useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext.tsx';
+import { Loader } from './components/Loader.tsx';
 
 export const LoginPage: React.FC = () => {
   const [email, setEmail] = useState<string>('');
@@ -14,10 +15,12 @@ export const LoginPage: React.FC = () => {
   });
   const [serverError, setServerError] = useState('');
   const { setUser } = useContext(AuthContext);
+  const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    setIsLoading(true);
     try {
       setServerError('');
 
@@ -40,6 +43,8 @@ export const LoginPage: React.FC = () => {
       }
 
       return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -68,7 +73,9 @@ export const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="form-wrapper background-white">
+    <div
+      className={`form-wrapper background-white ${serverError ? 'form-wrapper-danger' : ''}`}
+    >
       <h2 className="title">Sign in</h2>
       <form className="form-container" onSubmit={handleSubmit}>
         <div className="input-container">
@@ -100,12 +107,30 @@ export const LoginPage: React.FC = () => {
             placeholder="Enter your password"
           />
           {errors.password && <p className="notification">{errors.password}</p>}
-          {serverError && <p className="notification">{serverError}</p>}
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <p className="notification">{serverError}</p>
+          )}
         </div>
         <div className="button-error-container">
           <button type="submit" className="form-button">
             Sign in
           </button>
+        </div>
+        <div className="form-links">
+          <span>
+            Do not have an account?{' '}
+            <NavLink to={'/register'} className="form-link">
+              Sign up
+            </NavLink>
+          </span>
+          <span>
+            Forget password ?{' '}
+            <NavLink to={'/forgot-password'} className="form-link">
+              Reset
+            </NavLink>
+          </span>
         </div>
       </form>
     </div>

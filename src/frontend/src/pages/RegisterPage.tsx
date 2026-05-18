@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormErrors } from '../types/FormErrors.ts';
 import { register } from '../api/auth.ts';
 import { validateValues } from '../utils/validateValues.ts';
+import { Loader } from './components/Loader.tsx';
 
 export const RegisterPage: React.FC = () => {
   const [name, setName] = useState<string>('');
@@ -14,6 +15,7 @@ export const RegisterPage: React.FC = () => {
   });
   const [serverError, setServerError] = useState('');
   const [registered, setRegistered] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   if (registered) {
     return (
@@ -25,6 +27,7 @@ export const RegisterPage: React.FC = () => {
   }
 
   const handleRegister = async () => {
+    setIsLoading(true);
     try {
       setServerError('');
 
@@ -45,6 +48,8 @@ export const RegisterPage: React.FC = () => {
       }
 
       return false;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -72,7 +77,9 @@ export const RegisterPage: React.FC = () => {
   };
 
   return (
-    <div className={`form-wrapper background-white ${serverError ? 'form-wrapper-danger' : ''}`}>
+    <div
+      className={`form-wrapper background-white ${serverError ? 'form-wrapper-danger' : ''}`}
+    >
       <h2 className="title">Sign up</h2>
       <form className="form-container" onSubmit={handleSubmit}>
         <div className="input-container">
@@ -119,7 +126,11 @@ export const RegisterPage: React.FC = () => {
             placeholder="Enter your password"
           />
           {errors.password && <p className="notification">{errors.password}</p>}
-          {serverError && <p className="notification">{serverError}</p>}
+          {isLoading ? (
+            <Loader />
+          ) : (
+            <p className="notification">{serverError}</p>
+          )}
         </div>
         <div className="button-error-container">
           <button type="submit" className="form-button">

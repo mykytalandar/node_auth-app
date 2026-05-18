@@ -2,8 +2,10 @@ import { User } from '../models/user.js';
 import 'dotenv/config';
 import { userService } from '../services/user.service.js';
 import { jwtService } from '../services/jwt.service.js';
-import { createApiError } from '../errors/ApiError.js';
 import { ApiError } from '../exeptions/api.error.js';
+import bcrypt from 'bcrypt';
+import { tokenService } from '../services/token.service.js';
+import { emailService } from '../services/email.service.js';
 
 function validateName(value) {
   if (!value) {
@@ -56,13 +58,16 @@ const register = async (req, res) => {
     throw ApiError.badRequest('Bad request', errors);
   }
 
-  await userService.register(name, email, password);
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  await userService.register(name, email, hashedPassword);
 
   res.send({ message: 'OK' });
 };
 
 const activate = async (req, res) => {
   const { activationToken } = req.params;
+
   const user = await User.findOne({ where: { activationToken } });
 
   if (!user) {
@@ -73,9 +78,7 @@ const activate = async (req, res) => {
   user.activationToken = null;
   await user.save();
 
-  console.log(process.env.SERVER_HOST);
-
-  res.redirect(`${process.env.CLIENT_HOST}/`);
+  await generateTokens(res, user);
 };
 
 const login = async (req, res) => {
@@ -83,36 +86,129 @@ const login = async (req, res) => {
 
   const user = await userService.findByEmail(email);
 
-  if (!user || user.password !== password) {
-    throw createApiError('Invalid email or password', 401);
+  if (!user) {
+    throw ApiError.badRequest('No such user');
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+
+  if (!isPasswordValid) {
+    throw ApiError.badRequest('Wrong password');
   }
 
   if (user.activationToken !== null) {
-    throw createApiError('Account is not activated. Check your email!', 401);
+    throw ApiError.unauthorized('Account is not activated. Check your email!');
   }
 
-  const normalizedUser = userService.normalizeData(user);
-  const accessToken = jwtService.sign(normalizedUser);
-
-  res.send({
-    user: normalizedUser,
-    accessToken,
-  });
+  await generateTokens(res, user);
 };
 
 const me = async (req, res) => {
   const user = await userService.findByEmail(req.user.email);
 
   if (!user) {
-    throw new Error('User not found');
+    throw ApiError.notFound('User not found');
   }
 
   res.send(user);
 };
+
+const refresh = async (req, res) => {
+  const { refreshToken } = req.cookies;
+
+  if (!refreshToken) {
+    throw ApiError.unauthorized();
+  }
+
+  const userData = jwtService.verifyRefresh(refreshToken);
+  const token = await tokenService.getByToken(refreshToken);
+
+  if (!userData || !token) {
+    throw ApiError.unauthorized();
+
+    return;
+  }
+
+  const user = await userService.findByEmail(userData.email);
+
+  await generateTokens(res, user);
+};
+
+const logout = async (req, res) => {
+  const { refreshToken } = req.cookies;
+
+  const userData = jwtService.verifyRefresh(refreshToken);
+
+  if (!userData) {
+    throw ApiError.unauthorized();
+
+    return;
+  }
+
+  await tokenService.remove(userData.id);
+
+  res.clearCookie('refreshToken');
+
+  res.sendStatus(204);
+};
+
+const sendPasswordResetLink = async (req, res) => {
+  const { email } = req.body;
+
+  await userService.sendPasswordResetLink(email);
+
+  res.send({ message: 'OK' });
+};
+
+const validateResetToken = async (req, res) => {
+  const { resetToken } = req.params;
+
+  const user = await User.findOne({ where: { resetToken } });
+
+  if (!user) {
+    res.sendStatus(404);
+
+    return;
+  }
+
+  res.send({ message: 'OK' });
+};
+
+const confirmNewPassword = async (req, res) => {
+  const { resetToken, newPassword } = req.body;
+
+  const user = await User.findOne({ where: { resetToken } });
+
+};
+
+async function generateTokens(res, user) {
+  const normalizedUser = userService.normalizeData(user);
+
+  const accessToken = jwtService.sign(normalizedUser);
+  const refreshToken = jwtService.signRefresh(normalizedUser);
+
+  await tokenService.save(normalizedUser.id, refreshToken);
+
+  res.cookie('refreshToken', refreshToken, {
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    sameSite: 'lax',
+  });
+
+  res.send({
+    user: normalizedUser,
+    accessToken,
+  });
+}
 
 export const authController = {
   register,
   activate,
   login,
   me,
+  refresh,
+  logout,
+  sendPasswordResetLink,
+  validateResetToken,
+  confirmNewPassword,
 };

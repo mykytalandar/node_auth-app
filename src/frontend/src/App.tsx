@@ -1,27 +1,52 @@
 import './App.css';
 import { HomePage } from './pages/HomePage';
-import { Route, Routes, NavLink, useLocation } from 'react-router-dom';
+import {
+  Route,
+  Routes,
+  NavLink,
+  useLocation,
+  useNavigate,
+  Navigate,
+} from 'react-router-dom';
 import { RegisterPage } from './pages/RegisterPage';
 import { LoginPage } from './pages/LoginPage';
 import { ProfilePage } from './pages/ProfilePage/ProfilePage';
 import { useContext, useEffect } from 'react';
 import { AuthContext } from './context/AuthContext';
-import { checkAuth } from './api/auth';
+import { checkAuth, logout } from './api/auth';
+import { ActivationPage } from './pages/ActivationPage';
+import { Loader } from './pages/components/Loader';
+import { ResetPasswordForm } from './pages/ResetPasswordPage/ResetPasswordForm';
+import { ResetPasswordPage } from './pages/ResetPasswordPage/ResetPasswordPage';
 
 function App() {
   const { pathname } = useLocation();
-  const { user, setUser } = useContext(AuthContext);
+  const { user, setUser, isLoading, setIsLoading } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function fetchUserData() {
-      const authUser = await checkAuth();
+      setIsLoading(true);
+      try {
+        const authUser = await checkAuth();
 
-      if (authUser) {
-        setUser(authUser);
+        if (authUser) {
+          setUser(authUser);
+        }
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setIsLoading(false);
       }
     }
     fetchUserData();
-  }, [setUser]);
+  }, [setUser, setIsLoading]);
+
+  const handleLogout = async () => {
+    await logout();
+    setUser(null);
+    navigate('/login');
+  };
 
   return (
     <>
@@ -44,7 +69,9 @@ function App() {
           )}
 
           {user ? (
-            <button className="form-button">Log out</button>
+            <button className="form-button" onClick={handleLogout}>
+              Log out
+            </button>
           ) : (
             <>
               <NavLink
@@ -66,12 +93,34 @@ function App() {
       <div className="gradient-wrapper">
         <main className="main">
           <section className="routes">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route path="register" element={<RegisterPage />} />
-              <Route path="login" element={<LoginPage />} />
-              <Route path="profile" element={<ProfilePage />} />
-            </Routes>
+            {isLoading ? (
+              <Loader />
+            ) : (
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="register" element={<RegisterPage />} />
+                <Route
+                  path="login"
+                  element={user ? <Navigate to="/profile" /> : <LoginPage />}
+                />
+                <Route
+                  path="activation/:activationToken"
+                  element={<ActivationPage />}
+                />
+                <Route
+                  path="profile"
+                  element={user ? <ProfilePage /> : <Navigate to="/login" />}
+                />
+                <Route
+                  path="/forgot-password"
+                  element={user ? <Navigate to="/login" /> : <ResetPasswordForm />}
+                />
+                <Route
+                  path="/reset-password/:resetToken"
+                  element={user ? <Navigate to="/" /> : <ResetPasswordPage />}
+                />
+              </Routes>
+            )}
           </section>
         </main>
       </div>

@@ -1,0 +1,115 @@
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { confirmNewPassword, validateToken } from '../../api/auth';
+import type { NewPasswordErrors } from '../../types/FormErrors';
+import { validateValues } from '../../utils/validateValues';
+import type { ConfirmNewPasswordData } from '../../types/ConfirmNewPasswordData';
+
+export const ResetPasswordPage: React.FC = () => {
+  const { resetToken } = useParams();
+
+  const navigate = useNavigate();
+
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [errors, setErrors] = useState<NewPasswordErrors>({
+    newPassword: '',
+    confirmPassword: '',
+  });
+
+  useEffect(() => {
+    async function init() {
+      if (!resetToken) {
+        return;
+      }
+
+      const isSuccess = await validateToken(resetToken);
+
+      if (!isSuccess) {
+        navigate('/404');
+      }
+    }
+
+    init();
+  }, [resetToken, navigate]);
+
+  const handleSubmit = (event: React.SubmitEvent) => {
+    event.preventDefault();
+
+    const newErrors: NewPasswordErrors = {
+      newPassword: validateValues.password(newPassword),
+      confirmPassword: validateValues.password(confirmPassword),
+    };
+
+    setErrors(newErrors);
+
+    const hasErrors = Object.values(newErrors).some((error) => error);
+
+    if (hasErrors) {
+      setError('');
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setError('Passwords do not match!');
+    }
+
+    if (!resetToken) {
+      return;
+    }
+
+    const data: ConfirmNewPasswordData = {
+      token: resetToken,
+      newPassword: confirmPassword,
+    };
+
+    confirmNewPassword(data);
+  };
+
+  return (
+    <div className="form-wrapper background-white">
+      <h2>Create a new password</h2>
+      <form className="form-container" onSubmit={handleSubmit}>
+        <div className="input-container">
+          <label htmlFor="newPassword">
+            <strong>Password</strong>
+          </label>
+          <input
+            type="password"
+            name="newPassword"
+            id="newPassword"
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+            className={`form-input`}
+            placeholder="Set new password"
+          />
+          {errors.newPassword && (
+            <p className="notification">{errors.newPassword}</p>
+          )}
+        </div>
+        <div className="input-container">
+          <label htmlFor="confirmPassword">
+            <strong>New password</strong>
+          </label>
+          <input
+            type="password"
+            name="confirmPassword"
+            id="confirmPassword"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className={`form-input`}
+            placeholder="Confirm new password"
+          />
+          {errors.confirmPassword && (
+            <p className="notification">{errors.confirmPassword}</p>
+          )}
+        </div>
+        {error && <p className="notification">{error}</p>}
+        <button type="submit" className="form-button">
+          Confirm
+        </button>
+      </form>
+    </div>
+  );
+};

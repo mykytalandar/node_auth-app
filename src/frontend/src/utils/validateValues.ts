@@ -1,5 +1,4 @@
 function name(value: string) {
-  return;
   if (!value) {
     return 'Name is required';
   }
@@ -12,7 +11,6 @@ function name(value: string) {
 }
 
 function email(value: string) {
-  return
   if (!value) {
     return 'Email is required';
   }
@@ -27,7 +25,6 @@ function email(value: string) {
 }
 
 function password(value: string) {
-  return;
   if (!value) {
     return 'Password is required';
   }

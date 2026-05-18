@@ -1,4 +1,4 @@
-import { createApiError } from '../errors/ApiError.js';
+import { where } from 'sequelize';
 import { ApiError } from '../exeptions/api.error.js';
 import { User } from '../models/user.js';
 import { emailService } from '../services/email.service.js';
@@ -21,17 +21,38 @@ function findByEmail(email) {
 }
 
 async function register(name, email, password) {
-  const activationToken = uuidvv4();
-
   const existUser = await findByEmail(email);
 
   if (existUser) {
-    throw ApiError.badRequest('User already exists', {
-      email: 'User already exists',
-    });
+    throw ApiError.badRequest('User already exists');
   }
 
+  const activationToken = uuidvv4();
+
+  await User.create({
+    name,
+    email,
+    password,
+    activationToken,
+  });
+
   await emailService.sendActivationEmail(email, activationToken);
+}
+
+async function sendPasswordResetLink(email) {
+  const existUser = await findByEmail(email);
+
+  // We intentionally do not reveal whether the user exists.
+  // Returning the same response for all cases prevents
+  // email enumeration attacks and avoids leaking account data.
+
+  if (existUser) {
+    const resetToken = uuidvv4();
+
+    await User.update({ resetToken }, { where: { email } });
+
+    await emailService.sendResetPasswordEmail(email, resetToken);
+  }
 }
 
 export const userService = {
@@ -39,4 +60,5 @@ export const userService = {
   normalizeData,
   findByEmail,
   register,
+  sendPasswordResetLink,
 };
