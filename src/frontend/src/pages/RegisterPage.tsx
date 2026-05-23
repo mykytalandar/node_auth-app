@@ -3,6 +3,8 @@ import type { FormErrors } from '../types/FormErrors.ts';
 import { register } from '../api/auth.ts';
 import { validateValues } from '../utils/validateValues.ts';
 import { Loader } from './components/Loader.tsx';
+import { Info } from 'lucide-react';
+import { Tooltip } from 'react-tooltip';
 
 export const RegisterPage: React.FC = () => {
   const [name, setName] = useState<string>('');
@@ -113,9 +115,15 @@ export const RegisterPage: React.FC = () => {
           {errors.email && <p className="notification">{errors.email}</p>}
         </div>
         <div className="input-container">
-          <label htmlFor="password">
-            <strong>Password</strong>
-          </label>
+          <div className="password-icon-container">
+            <label htmlFor="password">
+              <strong>Password</strong>
+            </label>
+            <a className="my-anchor-element">{<Info size={20}/>}</a>
+            <Tooltip anchorSelect=".my-anchor-element" place="top">
+              Password must be at least 6 characters long
+            </Tooltip>
+          </div>
           <input
             type="password"
             name="password"

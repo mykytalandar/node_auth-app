@@ -46,7 +46,7 @@ export const ProfileChangePassword: React.FC<Props> = () => {
     }
 
     try {
-      await changePassword(currentPassword, newPassword);
+      await changePassword(currentPassword, newPassword, confirmPassword);
       setDone(true);
     } catch (error) {
       if (error instanceof Error) {
@@ -66,7 +66,7 @@ export const ProfileChangePassword: React.FC<Props> = () => {
 
   return (
     <div className="profile-information">
-      <h3>Change email</h3>
+      <h3>Change password</h3>
       <form className="form-container profile-form" onSubmit={handleSubmit}>
         <div className="input-container">
           <label htmlFor="currentPassword">

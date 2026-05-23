@@ -22,11 +22,13 @@ export async function changeName(newName: string) {
 export async function changePassword(
   currentPassword: string,
   newPassword: string,
+  confirmPassword: string,
 ) {
   try {
     const response = await api.patch('/profile/password', {
       currentPassword,
       newPassword,
+      confirmPassword,
     });
 
     return response.data;

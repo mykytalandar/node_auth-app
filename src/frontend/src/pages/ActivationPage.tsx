@@ -11,20 +11,43 @@ export const ActivationPage: React.FC = () => {
   const { setUser } = useContext(AuthContext);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!activationToken) {
-      return;
-    }
+  // useEffect(() => {
+  //   if (!activationToken) {
+  //     return;
+  //   }
 
-    activation(activationToken)
-      .then(setUser)
-      .catch((error) => {
+  //   activation(activationToken)
+  //     .then(setUser)
+  //     .catch((error) => {
+  //       if (error instanceof Error) {
+  //         setError(error.message);
+  //       }
+  //     })
+  //     .finally(() => setDone(true));
+  //   navigate('/profile');
+  // }, [setUser, activationToken, navigate]);
+
+  useEffect(() => {
+    async function init() {
+      if (!activationToken) {
+        return;
+      }
+
+      try {
+        const user = await activation(activationToken);
+
+        setUser(user);
+        setDone(true);
+
+        navigate('/profile');
+      } catch (error) {
         if (error instanceof Error) {
           setError(error.message);
         }
-      })
-      .finally(() => setDone(true));
-    navigate('/profile');
+      }
+    }
+
+    init();
   }, [setUser, activationToken, navigate]);
 
   if (!done) {
@@ -38,9 +61,7 @@ export const ActivationPage: React.FC = () => {
       {error ? (
         <p className="notification">{error}</p>
       ) : (
-        <p className="notification">
-          Your account is now active
-        </p>
+        <p className="notification">Your account is now active</p>
       )}
     </div>
   );

@@ -4,7 +4,8 @@ import { confirmNewPassword } from '../../api/auth';
 import type { NewPasswordErrors } from '../../types/FormErrors';
 import { validateValues } from '../../utils/validateValues';
 import type { ConfirmNewPasswordData } from '../../types/ConfirmNewPasswordData';
-import { CircleCheck } from 'lucide-react';
+import { CircleCheck, Info } from 'lucide-react';
+import { Tooltip } from 'react-tooltip';
 
 export const ResetPasswordPage: React.FC = () => {
   const { resetToken } = useParams();
@@ -75,9 +76,15 @@ export const ResetPasswordPage: React.FC = () => {
       <h2>Create a new password</h2>
       <form className="form-container" onSubmit={handleSubmit}>
         <div className="input-container">
-          <label htmlFor="newPassword">
-            <strong>Password</strong>
-          </label>
+          <div className="password-icon-container">
+            <label htmlFor="newPassword">
+              <strong>Password</strong>
+            </label>
+            <a className="my-anchor-element">{<Info size={20} />}</a>
+            <Tooltip anchorSelect=".my-anchor-element" place="top">
+              Password must be at least 6 characters long
+            </Tooltip>
+          </div>
           <input
             type="password"
             name="newPassword"
@@ -87,14 +94,21 @@ export const ResetPasswordPage: React.FC = () => {
             className={`form-input`}
             placeholder="Set new password"
           />
+
           {errors.newPassword && (
             <p className="notification">{errors.newPassword}</p>
           )}
         </div>
         <div className="input-container">
-          <label htmlFor="confirmPassword">
-            <strong>New password</strong>
-          </label>
+          <div className="password-icon-container">
+            <label htmlFor="confirmPassword">
+              <strong>Password</strong>
+            </label>
+            <a className="my-anchor-element">{<Info size={20} />}</a>
+            <Tooltip anchorSelect=".my-anchor-element" place="top">
+              Password must be at least 6 characters long
+            </Tooltip>
+          </div>
           <input
             type="password"
             name="confirmPassword"

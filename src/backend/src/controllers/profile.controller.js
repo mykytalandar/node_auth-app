@@ -27,7 +27,7 @@ const changeName = async (req, res) => {
 };
 
 const changePassword = async (req, res) => {
-  const { currentPassword, newPassword } = req.body;
+  const { currentPassword, newPassword, confirmPassword } = req.body;
 
   const currentPasswordError = validateValues.password(currentPassword);
   const newPasswordError = validateValues.password(newPassword);
@@ -38,6 +38,10 @@ const changePassword = async (req, res) => {
 
   if (newPasswordError) {
     throw ApiError.badRequest(newPasswordError);
+  }
+
+  if (newPassword !== confirmPassword) {
+    throw ApiError.badRequest('Passwords do not match!');
   }
 
   const user = await userService.findById(req.user.id);
@@ -83,7 +87,7 @@ const requestEmailChange = async (req, res) => {
   }
 
   user.pendingEmail = newEmail;
-  user.save();
+  await user.save();
 
   await userService.sendEmailChangeLink(newEmail, user.email);
 

@@ -22,6 +22,10 @@ app.use('/profile', profileRouter)
 
 app.use(errorMiddleware);
 
+app.use((req, res) => {
+  res.status(404).send({ message: 'Not found' });
+});
+
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`Server is running on port:${PORT}`);
