@@ -144,6 +144,10 @@
   color: red;
 }
 
+.notification-success {
+  color: green;
+}
+
 .button-error-container {
   display: flex;
   flex-direction: row;
@@ -173,12 +177,32 @@
   flex-direction: column;
 }
 
+.reset-pass {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.reset-pass-link {
+  color: #8B7FFF;
+  text-decoration: none;
+  transition: var(--transition);
+
+  &:hover {
+    color: var(--link-hover-color);
+  }
+}
+
 .profile {
   max-width: 800px;
   flex-grow: 1;
   border: var(--border);
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
+}
+
+.profile-form {
+  margin-top: 30px;
 }
 
 .profile-separator {
@@ -208,6 +232,28 @@
   border-radius: var(--border-radius);
 }
 
+.profile-information-done {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+.profile-information-title {
+  text-align: center;
+}
+
+.profile-change-email-title {
+  margin-top: 60px;
+}
+
+.profile-name-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
 .profile-title {
   margin: 0;
 }
@@ -215,6 +261,10 @@
 .profile-nav-link {
   cursor: pointer;
   transition: var(--transition);
+}
+
+.profile-nav-link-active {
+  color: var(--link-hover-color);
 }
 
 .profile-nav-link:hover {
@@ -238,9 +288,37 @@
   color: #6B7280;
 }
 
+.profile-text-container {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-input {
+  width: 80%;
+}
+
+.profile-buttons {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
+}
+
+.profile-button-name {
+  width: 50%;
+}
+
 .profile-image {
   width: 100px;
   height: 60px;
+}
+
+.not-found {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .loader-wrapper {

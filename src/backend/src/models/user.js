@@ -20,5 +20,11 @@ export const User = client.define('user', {
   },
   resetToken: {
     type: DataTypes.STRING,
+  },
+  pendingEmail: {
+    type: DataTypes.STRING,
+  },
+  emailChangeToken: {
+    type: DataTypes.STRING,
   }
 });

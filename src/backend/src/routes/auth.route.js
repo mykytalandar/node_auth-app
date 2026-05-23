@@ -11,6 +11,5 @@ authRouter.get('/refresh', catchError(authController.refresh));
 authRouter.get('/logout', catchError(authController.logout));
 
 authRouter.post('/reset-password', catchError(authController.sendPasswordResetLink));
-authRouter.post('/reset-password/validate/:resetToken', catchError(authController.validateResetToken));
 authRouter.post('/reset-password/confirm', catchError(authController.confirmNewPassword));
 

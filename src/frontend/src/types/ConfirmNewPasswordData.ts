@@ -1,4 +1,4 @@
 export type ConfirmNewPasswordData = {
-  token: string,
+  resetToken: string,
   newPassword: string,
 };

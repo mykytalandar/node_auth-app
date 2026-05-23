@@ -8,12 +8,6 @@ export const ResetPasswordForm: React.FC = () => {
   const handleReset = async () => {
     await resetPassword(email);
     setRegistered(true);
-    // try {
-    //   await resetPassword(email);
-    //   setRegistered(true);
-    // } catch (error) {
-    //   console.log(error);
-    // }
   };
 
   const handleSubmit = async (event: React.SubmitEvent) => {

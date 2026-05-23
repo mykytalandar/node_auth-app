@@ -11,4 +11,10 @@ export type NewPasswordErrors = {
   confirmPassword: string;
 };
 
+export type ChangePasswordErorrs = NewPasswordErrors & { currentPassword: string }
 
+export type ChangeEmailErrors = {
+  newEmail: string,
+  confirmEmail: string,
+  password: string,
+};

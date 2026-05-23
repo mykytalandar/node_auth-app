@@ -20,6 +20,10 @@ function findByEmail(email) {
   return User.findOne({ where: { email } });
 }
 
+function findById(id) {
+  return User.findByPk(id);
+}
+
 async function register(name, email, password) {
   const existUser = await findByEmail(email);
 
@@ -55,10 +59,20 @@ async function sendPasswordResetLink(email) {
   }
 }
 
+async function sendEmailChangeLink(newEmail, currentEmail) {
+  const emailChangeToken = uuidvv4();
+
+  await User.update({ emailChangeToken }, { where: { email: currentEmail } });
+
+  await emailService.sendActivationNewEmail(newEmail, emailChangeToken);
+};
+
 export const userService = {
   getAllActivated,
   normalizeData,
   findByEmail,
+  findById,
   register,
   sendPasswordResetLink,
+  sendEmailChangeLink,
 };

@@ -11,21 +11,36 @@ import {
 import { RegisterPage } from './pages/RegisterPage';
 import { LoginPage } from './pages/LoginPage';
 import { ProfilePage } from './pages/ProfilePage/ProfilePage';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { AuthContext } from './context/AuthContext';
 import { checkAuth, logout } from './api/auth';
 import { ActivationPage } from './pages/ActivationPage';
 import { Loader } from './pages/components/Loader';
 import { ResetPasswordForm } from './pages/ResetPasswordPage/ResetPasswordForm';
 import { ResetPasswordPage } from './pages/ResetPasswordPage/ResetPasswordPage';
+import { ConfirmEmailChange } from './pages/ProfilePage/components/ConfirmEmailChange';
+import { NotFoundPage } from './pages/NotFoundPage';
 
 function App() {
   const { pathname } = useLocation();
   const { user, setUser, isLoading, setIsLoading } = useContext(AuthContext);
   const navigate = useNavigate();
+  const hasCheckedAuth = useRef(false);
+
+  // Prevent duplicate API requests in React StrictMode.
+  // In development mode, React may execute useEffect multiple times,
+  // which can trigger repeated confirmation requests for the same token.
+  // Since this endpoint is one-time-use (the token is invalidated after success),
+  // we use a ref guard to ensure the request runs only once per component lifecycle.
 
   useEffect(() => {
     async function fetchUserData() {
+      if (hasCheckedAuth.current) {
+        return;
+      }
+
+      hasCheckedAuth.current = true;
+
       setIsLoading(true);
       try {
         const authUser = await checkAuth();
@@ -113,12 +128,19 @@ function App() {
                 />
                 <Route
                   path="/forgot-password"
-                  element={user ? <Navigate to="/login" /> : <ResetPasswordForm />}
+                  element={
+                    user ? <Navigate to="/login" /> : <ResetPasswordForm />
+                  }
                 />
                 <Route
                   path="/reset-password/:resetToken"
                   element={user ? <Navigate to="/" /> : <ResetPasswordPage />}
                 />
+                <Route
+                  path="/confirm-email-change/:emailChangeToken"
+                  element={<ConfirmEmailChange />}
+                />
+                <Route path="*" element={<NotFoundPage />} />
               </Routes>
             )}
           </section>

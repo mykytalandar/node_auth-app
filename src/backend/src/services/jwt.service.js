@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import 'dotenv/config';
 
 function sign(user) {
-  const token = jwt.sign(user, process.env.JWT_KEY, { expiresIn: '60s'});
+  const token = jwt.sign({ id: user.id }, process.env.JWT_KEY, { expiresIn: '60s'});
 
   return token;
 }

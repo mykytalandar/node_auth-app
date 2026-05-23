@@ -1,7 +1,7 @@
 import express from 'express';
 import 'dotenv/config';
 import { authRouter } from './routes/auth.route.js';
-import { meRouter } from './routes/me.route.js';
+import { profileRouter } from './routes/profile.route.js'
 import cors from 'cors';
 import { errorMiddleware } from './middlewares/errorMiddleware.js';
 import cookieParser from 'cookie-parser';
@@ -18,7 +18,7 @@ app.use(cors({
   credentials: true,
 }))
 app.use(authRouter);
-app.use(meRouter);
+app.use('/profile', profileRouter)
 
 app.use(errorMiddleware);
 

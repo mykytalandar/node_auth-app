@@ -1,15 +1,13 @@
-import { useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
-import { confirmNewPassword, validateToken } from '../../api/auth';
+import { useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { confirmNewPassword } from '../../api/auth';
 import type { NewPasswordErrors } from '../../types/FormErrors';
 import { validateValues } from '../../utils/validateValues';
 import type { ConfirmNewPasswordData } from '../../types/ConfirmNewPasswordData';
+import { CircleCheck } from 'lucide-react';
 
 export const ResetPasswordPage: React.FC = () => {
   const { resetToken } = useParams();
-
-  const navigate = useNavigate();
-
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
@@ -17,25 +15,11 @@ export const ResetPasswordPage: React.FC = () => {
     newPassword: '',
     confirmPassword: '',
   });
+  const [done, setDone] = useState(false);
 
-  useEffect(() => {
-    async function init() {
-      if (!resetToken) {
-        return;
-      }
-
-      const isSuccess = await validateToken(resetToken);
-
-      if (!isSuccess) {
-        navigate('/404');
-      }
-    }
-
-    init();
-  }, [resetToken, navigate]);
-
-  const handleSubmit = (event: React.SubmitEvent) => {
+  const handleSubmit = async (event: React.SubmitEvent) => {
     event.preventDefault();
+    setError('');
 
     const newErrors: NewPasswordErrors = {
       newPassword: validateValues.password(newPassword),
@@ -47,12 +31,12 @@ export const ResetPasswordPage: React.FC = () => {
     const hasErrors = Object.values(newErrors).some((error) => error);
 
     if (hasErrors) {
-      setError('');
       return;
     }
 
     if (newPassword !== confirmPassword) {
       setError('Passwords do not match!');
+      return;
     }
 
     if (!resetToken) {
@@ -60,12 +44,31 @@ export const ResetPasswordPage: React.FC = () => {
     }
 
     const data: ConfirmNewPasswordData = {
-      token: resetToken,
-      newPassword: confirmPassword,
+      resetToken,
+      newPassword,
     };
 
-    confirmNewPassword(data);
+    try {
+      await confirmNewPassword(data);
+      setDone(true);
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error.message);
+      }
+    }
   };
+
+  if (done) {
+    return (
+      <div className="reset-pass">
+        <CircleCheck size={50} color="green" />
+        <h2>Password successfully changed!</h2>
+        <a href="/login" className="reset-pass-link">
+          LOGIN
+        </a>
+      </div>
+    );
+  }
 
   return (
     <div className="form-wrapper background-white">

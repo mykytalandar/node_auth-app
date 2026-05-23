@@ -46,8 +46,43 @@ function sendResetPasswordEmail(email, resetToken) {
   });
 }
 
+function sendActivationNewEmail(email, emailChangeToken) {
+  const href = `${process.env.CLIENT_HOST}/confirm-email-change/${emailChangeToken}`;
+  const html = `
+  <h2>Change email</h1>
+  <a href="${href}">${href}</a>
+  `;
+
+  send({
+    email,
+    html,
+    subject: 'Confirm email change!',
+  });
+}
+
+function sendNotificationAboutEmailChange(oldEmail, newEmail) {
+  const html = `
+  <h2>Email changed</h2>
+
+  <p>
+    Your account email was changed from:<br />
+    <strong>${oldEmail}</strong><br /><br />
+    to:<br />
+    <strong>${newEmail}</strong>
+  </p>
+`;
+
+  send({
+    email: oldEmail,
+    html,
+    subject: 'Your email address was changed',
+  });
+}
+
 export const emailService = {
+  send,
   sendActivationEmail,
   sendResetPasswordEmail,
-  send,
+  sendActivationNewEmail,
+  sendNotificationAboutEmailChange,
 };
