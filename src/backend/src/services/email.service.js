@@ -21,7 +21,7 @@ function send({ email, subject, html }) {
 function sendActivationEmail(email, token) {
   const href = `${process.env.CLIENT_HOST}/activation/${token}`;
   const html = `
-  <h2>Activate account</h1>
+  <h2>Activate account</h2>
   <a href="${href}">${href}</a>
   `;
 
@@ -35,7 +35,7 @@ function sendActivationEmail(email, token) {
 function sendResetPasswordEmail(email, resetToken) {
   const href = `${process.env.CLIENT_HOST}/reset-password/${resetToken}`;
   const html = `
-  <h2>Reset password</h1>
+  <h2>Reset password</h2>
   <a href="${href}">${href}</a>
   `;
 
@@ -49,7 +49,7 @@ function sendResetPasswordEmail(email, resetToken) {
 function sendActivationNewEmail(email, emailChangeToken) {
   const href = `${process.env.CLIENT_HOST}/confirm-email-change/${emailChangeToken}`;
   const html = `
-  <h2>Change email</h1>
+  <h2>Change email</h2>
   <a href="${href}">${href}</a>
   `;
 

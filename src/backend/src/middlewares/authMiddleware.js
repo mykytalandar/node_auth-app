@@ -1,4 +1,3 @@
-import { verify } from 'node:crypto';
 import { jwtService } from '../services/jwt.service.js';
 
 export const authMiddleware = (req, res, next) => {
